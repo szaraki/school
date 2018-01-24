@@ -1,12 +1,10 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdbool.h>
 
-#define True 1
-#define False 0
 
 int main() {
-	
-	
+	//console input segment
 	int input;
 	int x;
 	do {
@@ -25,10 +23,9 @@ int main() {
 				while ((c= getchar()) != '\n' && c != EOF) { }				
 			}
 		}
-		
 	} while (input == False);
 	
-	
+	//find segment
 	int min= 1;
 	int max= 10;
 	int chck;
