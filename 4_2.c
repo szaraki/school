@@ -10,27 +10,27 @@ int main() {
 	do {
 		printf("Enter number [1, 10]: ");
 		input= scanf("%d", &x);
-		if( input == False) {
+		if( input == false) {
 			printf("Error: check input\n");
 			char c;
 			while ((c= getchar()) != '\n' && c != EOF) { }
 		}
 		else {
 			if( x<=0 || x>10) {
-				input = False;
+				input = false;
 				printf("Error: check input\n");
 				char c;
 				while ((c= getchar()) != '\n' && c != EOF) { }				
 			}
 		}
-	} while (input == False);
+	} while (input == false);
 	
 	//find segment
 	int min= 1;
 	int max= 10;
 	int chck;
 	for( int n= 0;n < 5 ;n+=1 ) {
-		chck = (min+max)/2;
+		chck = (min+max)/2;	
 		if ( x > chck) {
 			min = chck;
 		}
