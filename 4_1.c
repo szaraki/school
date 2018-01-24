@@ -1,8 +1,8 @@
 #include <stdio.h>
 #include <math.h>
 
+
 void roots(int a[3]) {
-	
 	if( a[0] == ){
 		if (a[1] != 0) {
 			printf("Root: %lf\n",(double)(a[2])/a[1]);
@@ -24,12 +24,9 @@ void roots(int a[3]) {
 	}
 }
 
-
-
 int main() {
 	int n[3]= {1,2,1};
 	roots(n);
 	
-	
-	
+	return 0;
 }
