@@ -136,33 +136,8 @@ int input(const int min, const int max, char* str) {
 	return x;
 }
 
-void print_hex(int x) {
-	char arr[16] = {'0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F'};
-	
-	if( x != 0) {
-		print_hex(x/16);
-		printf("%c", arr[x%16]);
-	}
-	
-}
-
-void print_oct(int x) {
-	char arr[8] = {'0', '1', '2', '3', '4', '5', '6', '7'};
-	
-	if( x != 0) {
-		print_hex(x/8);
-		printf("%c", arr[x%8]);
-	}
-	
-}
-
-
 void p(double x, char* str) {
-	printf("%s: %lf, ", str, x);
-	print_hex(x);
-	printf(", ");
-	print_oct(x);
-	printf("\n");
+	printf("%s: %lf, %x, %o\n", str, x, (int)x, (int)x);
 }
 
 
