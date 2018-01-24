@@ -141,7 +141,7 @@ void print_hex(int x) {
 	
 	if( x != 0) {
 		print_hex(x/16);
-		printf("%c", arr[x]);
+		printf("%c", arr[x%16]);
 	}
 	
 }
@@ -151,7 +151,7 @@ void print_oct(int x) {
 	
 	if( x != 0) {
 		print_hex(x/8);
-		printf("%c", arr[x]);
+		printf("%c", arr[x%8]);
 	}
 	
 }
