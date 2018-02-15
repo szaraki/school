@@ -1,9 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
-
-#define True 1
-#define False 0
+#include <stdbool.h>
 
 
 char* str= NULL;
@@ -21,18 +19,17 @@ struct TextChuck {
 static struct TextChuck arr[10];
 
 int set(const char* text) {
-	
 	size_t MAX = strlen(text);
 	char* try = malloc(MAX*sizeof(char));
 	
 	if( try==NULL) {
 		free(try);
-		return False;
+		return false;
 	}
 	strcpy(try, text);
 	free(str);
 	str = try;
-	return True;
+	return true;
 }
 
 int append(const char* text) {
@@ -42,25 +39,24 @@ int append(const char* text) {
 	
 	if( try==NULL) {
 		free(try);
-		return False;
+		return false;
 	}
 	strcpy(try, str);
 	strcpy(try+ MAX_OLD, text);
 	free(str);
 	str = try;
-	return True;
-	
+	return true;
 }
 
 int initialise(void) {
 	char* try = malloc(1*sizeof(char));
 	if( try==NULL) {
 		free(try);
-		return False;
+		return false;
 	}
 	strcpy(try, "");
 	str = try;
-	return True;
+	return true;
 }
 
 void clean(void) {
