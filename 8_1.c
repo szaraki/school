@@ -1,17 +1,20 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdbool.h>
 
-#define True 1
-#define False 0
+int swipe(int* a, int* b){
+	int c = *a;
+	*a=*b;
+	*b=c;
+}
+
 
 void print_array(int* arr, const int MAX, char* name) {
-	
 	printf("%s: ", name);
 	for( int pos= 0; pos < MAX; pos+=1) {
 		printf("%d ",arr[pos]);
 	}
 	printf("\n");
-	
 }
 
 int sum(int* arr, const int MAX) {
@@ -24,7 +27,6 @@ int sum(int* arr, const int MAX) {
 }
 
 double mean(int* arr, const int MAX) {
-	
 	return (double)(sum(arr,MAX)/MAX);
 }
 
@@ -35,7 +37,6 @@ typedef struct{
 
 
 int num_check(Num* arr, const int MAX, int num) {
-	
 	for( int n= 0; n < MAX; n+=1) {
 		if (arr[n].num == num) {
 			arr[n].quantity+=1;
@@ -46,7 +47,6 @@ int num_check(Num* arr, const int MAX, int num) {
 }
 
 int mode(int* arr_A, const int MAX_A) {	// dominanta
-	
 	int MAX_B =1;
 	Num* arr_B= malloc(MAX_B * sizeof(Num));
 	arr_B[0].num= arr_A[0];
@@ -54,7 +54,7 @@ int mode(int* arr_A, const int MAX_A) {	// dominanta
 	
 	
 	for( int n= 0; n < MAX_A; n+=1) {
-		if (num_check(arr_B, MAX_B, arr_A[n]) == False) {
+		if (num_check(arr_B, MAX_B, arr_A[n]) == false) {
 			MAX_B+=1;
 			arr_B= realloc(arr_B, MAX_B * sizeof(Num));
 			arr_B[MAX_B-1].num= arr_A[n];
@@ -73,18 +73,17 @@ int mode(int* arr_A, const int MAX_A) {	// dominanta
 	result= arr_B[result].num;
 	free(arr_B);
 	return result;
-
 }	
 
 
 void sort(int* arr, const int MAX) {
-	
 	for( int n= 0; n< MAX; n+=1) {
 		for( int m= 0; m+1< MAX-n; m+=1) {
 			if( arr[m] > arr[m+1]) {
-				int temp= arr[m];
-				arr[m]= arr[m+1];
-				arr[m+1]= temp;
+				swipe(arr+m, arr+m+1);
+				//int temp= arr[m];
+				//arr[m]= arr[m+1];
+				//arr[m+1]= temp;
 			}
 		}	
 	}
@@ -92,7 +91,6 @@ void sort(int* arr, const int MAX) {
 
 double median(int* arr, const int MAX) {
 	//make table for checking median
-	
 	sort(arr, MAX);
 	
 	if( MAX%2== 0){
@@ -101,7 +99,6 @@ double median(int* arr, const int MAX) {
 	else {
 		return (arr[(MAX/2)]);
 	}
-	
 }
 
 int* load(const int MAX) {
@@ -114,36 +111,36 @@ int* load(const int MAX) {
 int input(const int min, const int max, char* str) {
 	int input;
 	int x;
+	
 	do {
 		printf("%s", str);
 		input= scanf("%d", &x);
-		if( input == False) {
+		if( input == false) {
 			printf("Error: check input\n");
 			char c;
 			while ((c= getchar()) != '\n' && c != EOF) { }
 		}
 		else {
 			if( x<min || x>=max) {
-				input = False;
+				input = false;
 				printf("Error: check input\n");
 				char c;
 				while ((c= getchar()) != '\n' && c != EOF) { }				
 			}
 		}
 		
-	} while (input == False);
+	} while (input == false);
 	
 	return x;
 }
 
-void p(double x, char* str) {
+void print_console(double x, char* str) {
 	printf("%s: %lf, %x, %o\n", str, x, (int)x, (int)x);
 }
 
 
 
 int main() {
-	
 	int MAX = input(1,10000, "Enter size of array: ");
 	int* arr= load(MAX);
 	for( int n= 0; n < MAX; n+=1) {
@@ -151,10 +148,10 @@ int main() {
 		arr[n]= input(-100000, 100000, "");
 	}
 	
-	p(sum(arr, MAX), "Sum");
-	p(mean(arr, MAX), "Mean");
-	p(median(arr, MAX), "Median");
-	p(mode(arr, MAX), "Mode");
+	print_console(sum(arr, MAX), "Sum");
+	print_console(mean(arr, MAX), "Mean");
+	print_console(median(arr, MAX), "Median");
+	print_console(mode(arr, MAX), "Mode");
 	
 	free(arr);
 	return 0;

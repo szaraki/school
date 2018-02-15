@@ -3,53 +3,44 @@
 #include <ctype.h>
 #include <string.h>
 
-enum ArgumentType{ chr, chr_ptr, intt, doublee};
+enum ArgumentType{ TYPE_CHAR, TYPE_CHAR_PTR, TYPE_INT, TYPE_DOUBLE};
 
 
-void print_int(int arg, unsigned width) {
-	int len= log10(arg);
-	int max= (width- len)/2;
-	for( int n= 0; n< max; n+=1) {
-			printf("-");
+void make_line(int size) {
+	char* line = "";
+	for( int n= 0; n < size; n++) {
+		printf("-");
 	}
-	printf("%d", arg);
-	width-= max+len+1;
-	for( int n= 0; n< width; n+=1) {
-			printf("-");
-	}
+}
+
+
+void print_int(int* arg, unsigned width) {
+	int len= log10(arg[0]);
+	int max= ((double)width- len)/2;
+	make_line(max);
+	printf("%d", arg[0]);
+	make_line(width-max-len-1);
 	printf("\n");
 }
 
-void print_char(char arg, unsigned width) {
+void print_char(char* arg, unsigned width) {
 	int max= (width-1)/2;
-	for( int n= 0; n< max; n+=1) {
-			printf("-");
-	}
-	printf("%c", arg);
-	width-= max+1;
-	for( int n= 0; n< width; n+=1) {
-			printf("-");
-	}
+	make_line(max);
+	printf("%c", arg[0]);
+	make_line(max+1);
+	printf("\n");
 }
 
 void print_str(char* arg, unsigned width) {
 	if( arg== NULL) {
-		for( int n= 0; n< width ; n+=1) {
-			printf("-");
-		}
+		make_line(width);
 	}
 	else {
 		int len= strlen(arg);
 		int max= (width-len)/2;
-		for( int n= 0; n< max; n+=1) {
-			printf("-");
-		}
-		width-= len + max;
+		make_line(max);
 		printf("%s", arg);
-		
-		for( int n= 0; n< width; n+=1) {
-			printf("-");
-		}
+		make_line(width-max-strlen(arg));
 	}
 	printf("\n");
 }
@@ -66,18 +57,15 @@ void print_double(double* argg, unsigned width) {
 	else if( arg*10 == (int)(arg*10)) {
 		len= log10((int)arg)+2;
 		prec=1;
-		
-		
 	}
 	else {
 		len= log10((int)arg)+3;
 		prec=2;
-		
 	}
+	
 	int max= (width- len-1)/2;
-	for( int n= 0; n< max; n+=1) {
-			printf("-");
-	}
+	make_line(max);
+	
 	if( prec==0) {
 		printf("%d", (int)arg);
 	}
@@ -87,10 +75,9 @@ void print_double(double* argg, unsigned width) {
 	else {
 		printf("%.2lf", arg);
 	}
+	
 	width-= max+len+1;
-	for( int n= 0; n< width; n+=1) {
-			printf("-");
-	}
+	make_line(width);
 	printf("\n");
 }
 
@@ -98,36 +85,40 @@ void print_double(double* argg, unsigned width) {
 
 
 int printArgumentInTheMiddle(void* argument, enum ArgumentType type, unsigned width) {
-	
 	if (argument == NULL) {
 		for( int n=0; n<width/2; n+=1) {
 			printf("-");
 		}
 	}
 	switch( type) {
-		case chr:
+		case TYPE_CHAR:
 			print_char(argument, width);
 			return 1;
-		case chr_ptr:
+		case TYPE_CHAR_PTR:
 			print_str(argument, width);
 			return 1;
-		case intt:
+		case TYPE_INT:
 			print_int(argument, width);
 			return 1;
-		case doublee:
+		case TYPE_DOUBLE:
 			print_double(argument, width);
 			return 1;
 	}
+	
 	return 0;
 }
 
 
 
 int main() {
-	
-	double n[]= {2.};
-	printArgumentInTheMiddle(n, doublee, 10);
-	
+	const double test_double= 2.;
+	printArgumentInTheMiddle(&test_double, TYPE_DOUBLE, 10);
+	const char	test_char= 'x';
+	printArgumentInTheMiddle(&test_char, TYPE_CHAR, 10);
+	const char* test_char_ptr= "test";
+	printArgumentInTheMiddle(test_char_ptr, TYPE_CHAR_PTR, 10);
+	const int 	test_int= 22;
+	printArgumentInTheMiddle(&test_int, TYPE_INT, 10);
 	
 	return 0;
 }
