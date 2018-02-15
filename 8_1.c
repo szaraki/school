@@ -46,7 +46,7 @@ int num_check(Num* arr, const int MAX, int num) {
 	return 0;
 }
 
-int mode(int* arr_A, const int MAX_A) {	// dominanta
+int mode(int* arr_A, const int MAX_A) {
 	int MAX_B =1;
 	Num* arr_B= malloc(MAX_B * sizeof(Num));
 	arr_B[0].num= arr_A[0];
