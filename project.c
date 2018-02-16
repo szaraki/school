@@ -251,7 +251,7 @@ void histogram_equalization(data* file_data, int** histogram_arr ) {
   for( int n= 0; n<3; n+=1) {
 	LUT[n]= malloc(max* sizeof(float));  
   }
-  /*
+  
   int min_index[3]={0,0,0};
   long histogram[3]={0,0,0};
   for( int n= 0; n<3; n+=1) { 
@@ -262,7 +262,7 @@ void histogram_equalization(data* file_data, int** histogram_arr ) {
 	    min_index[n]=x;  
 	  }
     }
-  }
+  }/*
   printf("test");
   for( int n= 0; n<3; n+=1) { 
     float min= LUT[n][min_index[n]];
