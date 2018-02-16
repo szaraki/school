@@ -3,12 +3,18 @@
 #include <png.h>
 
 
-
+//
+//   Program się włącza po dodaniu argumentu input_file.png
+//  Przykład: project.o plik.png
 //
 //   Program zmienia zdj stosując filtr( jako macierz),
 // oraz wygładza obraz (antialiasing ). Aby móc go skompilować
 // należy wgrać biblioteke libpng na urządzenie. Korzystałem z
 // ang dokumentacji + tutoriala do filtrow.
+//
+//   Przy pisaniu filtra należy dawać 0 albo 1, ponieważ są to najbardziej
+//  oczekiwane rozwiązania.
+//
 //
 //
 
@@ -126,26 +132,61 @@ void antialiasing(data* file_data) {
 }
 
 
-void filtr(data* file_data) {
-  for(int y = 0; y < file_data->height; y++) {
+void filtr(data* file_data, int matrix[9]) {
+  for(int y = 0; y < file_data->height-3; y++) {
     png_bytep row = file_data->row_pointers[y];
-    for(int x = 0; x < file_data->width; x++) {
+    for(int x = 0; x < file_data->width-3; x++) {
       png_bytep px = &(row[(x) * 4]);
-	  int matrix[9]=   {1,0,0,
-						0,1,0,
-						0,1,2};
-	  int a =matrix[0]*px[0]+matrix[1]*px[1]+matrix[2]*px[2];
-	  int b =matrix[3]*px[0]+matrix[4]*px[1]+matrix[5]*px[2];
-	  int c =matrix[6]*px[0]+matrix[7]*px[1]+matrix[8]*px[2];
-	  if( a> 255) a=255;
-	  if( b> 255) b=255;
-	  if( c> 255) c=255;
-	  px[0]=(png_uint_16)a;
-	  px[1]=(png_uint_16)b;
-	  px[2]=(png_uint_16)c;
+//	  int matrix[9]=   {1,0,0,
+//						0,1,0,
+//						0,1,2};
+
+	  int arr[3];
+	  for(int n=0; n<3; n++) {
+        arr[n] =matrix[3*n]*px[0]+matrix[3*n+1]*px[1]+matrix[3*n+2]*px[2];
+	    if( arr[n]> 255) arr[n]=255;
+	  }
+	  
+	  px[0]=(png_uint_16)(arr[0]);
+	  px[1]=(png_uint_16)(arr[1]);
+	  px[2]=(png_uint_16)(arr[2]);
     }
   }
 }
+
+void depth(data* file_data) {
+  for(int y = 0; y < file_data->height-3; y++) {
+    png_bytep row = file_data->row_pointers[y];
+    for(int x = 0; x < file_data->width-3; x++) {
+      png_bytep px = &(row[(x) * 4]);
+	  int matrix[9]=   {500,0,0,
+						0,500,0,
+						0,0,500};
+
+	  int arr[3];
+	  long sum;
+	  for(int n=0; n<3; n++) {
+		sum=0;
+		for(int px_y=0; px_y<3; px_y++) {
+		  for(int px_x=0; px_x<3; px_x++) {
+			png_bytep row_temp = file_data->row_pointers[y+px_y];
+            png_bytep px_temp = &(row_temp[(x+px_x) * 4]);
+			sum+=px_temp[n];
+		  }
+		}
+        arr[n] =matrix[3*n]*px[0]+matrix[3*n+1]*px[1]+matrix[3*n+2]*px[2];
+		arr[n]/=sum;
+	    if( arr[n]> 255) arr[n]=255;
+	  }
+	  
+	  px[0]=(png_uint_16)(arr[0]);
+	  px[1]=(png_uint_16)(arr[1]);
+	  px[2]=(png_uint_16)(arr[2]);
+    }
+  }
+}
+
+
 
 void saving(char *filename, data* file_data) {
   int y;
@@ -176,14 +217,39 @@ void saving(char *filename, data* file_data) {
 
 int main(int argc, char *argv[]) {
   if(argc != 2) abort();
-
+  
   data* file_data = load_png(argv[1]);
-  filtr(file_data);
-  saving("output_filtr.png", file_data);
+  
+  printf("Do you want antialiasing? [y/n]:");
+  char c;
+  scanf("%c", &c);
+  if(  c == 'y') {
+	antialiasing(file_data);
+  }
+  
+  printf("Do you want filr? [y/n]:");
+  //clear buffer
+  while ((c = getchar()) != '\n' && c != EOF) { }
+  scanf("%c", &c);
+  if(  c == 'y') {
+	int filtr_arr[9];
+	printf("Enter 9 int of your filtr\n");
+	for( int n= 0; n< 9; n++) {
+	  scanf("%d", filtr_arr+n);
+	}
+    filtr(file_data, filtr_arr);
+  }
+  printf("Do you want depth? [y/n]:");
+  //clear buffer
+  while ((c = getchar()) != '\n' && c != EOF) { }
+  scanf("%c", &c);
+  if(  c == 'y') {
+    depth(file_data);
+  }
+  
+  
+  saving("output.png", file_data);
 
-  file_data = load_png(argv[1]);
-  antialiasing(file_data);
-  saving("output_anti.png", file_data);
   
   return 0;
 }
