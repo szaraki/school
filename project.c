@@ -1,6 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <png.h>
+#include <math.h>
+
 
 
 //
@@ -110,6 +112,21 @@ int det(int* matrix) {
 }
 */
 
+
+void merge(data* file_data_a, data* file_data_b, int start_x, int start_y, int scale) {
+  for(int y = start_y; y < file_data_a->height && y < file_data_b->height ; y++) {
+    png_bytep row_a = file_data_a->row_pointers[y];
+    png_bytep row_b = file_data_b->row_pointers[y];
+    for(int x = start_x; x < file_data_a->width && x < file_data_b->width ; x++) {
+      png_bytep px_a = &(row_a[(x) * 4]);
+      png_bytep px_b = &(row_b[(x) * 4]);
+	  for( int n= 0; n< 3; n++) {
+		px_a[n]= (px_a[n]*(100-scale)+px_b[n]*(scale))/100; 
+	  }
+	}
+  }
+}
+
 void antialiasing(data* file_data) {
   for(int y = 0; y < file_data->height-3; y++) {
     png_bytep row = file_data->row_pointers[y+1];
@@ -159,10 +176,10 @@ void depth(data* file_data) {
     png_bytep row = file_data->row_pointers[y];
     for(int x = 0; x < file_data->width-3; x++) {
       png_bytep px = &(row[(x) * 4]);
-	  int matrix[9]=   {500,0,0,
-						0,500,0,
-						0,0,500};
-
+	  int matrix[9]=   {1000,0,0,
+						0,1000,0,
+						0,0,1000};
+						
 	  int arr[3];
 	  long sum;
 	  for(int n=0; n<3; n++) {
@@ -176,7 +193,7 @@ void depth(data* file_data) {
 		}
         arr[n] =matrix[3*n]*px[0]+matrix[3*n+1]*px[1]+matrix[3*n+2]*px[2];
 		arr[n]/=sum;
-	    if( arr[n]> 255) arr[n]=255;
+	    //if( arr[n]> 255) arr[n]=255;
 	  }
 	  
 	  px[0]=(png_uint_16)(arr[0]);
@@ -186,7 +203,77 @@ void depth(data* file_data) {
   }
 }
 
+void delate_one_of_rgb(int color, data* file_data) {
+  for(int y = 0; y < file_data->height-3; y++) {
+    png_bytep row = file_data->row_pointers[y];
+    for(int x = 0; x < file_data->width-3; x++) {
+      png_bytep px = &(row[(x) * 4]);
+	  px[color]=0;
+	}
+  }
+}
 
+//próba zrobienia http://www.algorytm.org/przetwarzanie-obrazow/histogram.html
+
+int** histogram( data* file_data) {
+  //init
+  png_bytep px = &(file_data->row_pointers[0][0]);
+  int** histogram_arr;
+  histogram_arr= malloc(3*sizeof(int*));
+  int max[3];
+  for( int n=0; n< 3; n+=1) {
+	max[n] = pow(2, sizeof(px));
+	printf("%f", max[n]);
+	printf("%lf\n", pow(2, sizeof(px)));
+    histogram_arr[n]= malloc(max[n]*sizeof(int));
+	for( int m= 0; m< max[n]; m+=1) {
+		histogram_arr[n][m]= 0;
+	}
+  }
+  //add data
+  for(int y = 0; y < file_data->height-3; y++) {
+    png_bytep row = file_data->row_pointers[y];
+    for(int x = 0; x < file_data->width-3; x++) {
+      png_bytep px = &(row[(x) * 4]);
+	  for( int n= 0; n< 3; n+=1) {
+		  histogram_arr[n][px[n]]+=1;
+	  }
+	}
+  }
+  
+  //end
+  return histogram_arr;
+}
+void histogram_equalization(data* file_data, int** histogram_arr ) {
+  int max = pow(2, 16);
+  float** LUT = malloc(3* sizeof(float*));
+  int s= file_data->width* file_data->height;
+  for( int n= 0; n<3; n+=1) {
+	LUT[n]= malloc(max* sizeof(float));  
+  }
+  /*
+  int min_index[3]={0,0,0};
+  long histogram[3]={0,0,0};
+  for( int n= 0; n<3; n+=1) { 
+    for( int x = 0; x < max; x++) {
+	  histogram[n]+=histogram_arr[n][x];
+	  LUT[n][x]=(float)histogram_arr[n][x]/s;
+	  if( LUT[n][min_index[n]] > LUT[n][x]) {
+	    min_index[n]=x;  
+	  }
+    }
+  }
+  printf("test");
+  for( int n= 0; n<3; n+=1) { 
+    float min= LUT[n][min_index[n]];
+    for( int x = 0; x < max; x++) {
+	 // LUT[n][x]= (((float)LUT[n][x] - min) / (1. - min)) * (5); 
+	}
+  }*/
+  
+  free(LUT);
+  
+}
 
 void saving(char *filename, data* file_data) {
   int y;
@@ -219,6 +306,8 @@ int main(int argc, char *argv[]) {
   if(argc != 2) abort();
   
   data* file_data = load_png(argv[1]);
+  int** histogram_arr= histogram(file_data);
+  histogram_equalization(file_data, histogram_arr);
   
   printf("Do you want antialiasing? [y/n]:");
   char c;
@@ -246,10 +335,38 @@ int main(int argc, char *argv[]) {
   if(  c == 'y') {
     depth(file_data);
   }
-  
-  
+  printf("Do you want to merge? [y/n]:");
+  //clear buffer
+  while ((c = getchar()) != '\n' && c != EOF) { }
+  scanf("%c", &c);
+  if(  c == 'y') {
+	printf("Enter the name of another file.png: ");
+	char name[100];
+	scanf("%s", name);
+	data* file_data_b= load_png(name);
+	int start_x;
+	printf("Enter starting position x: ");
+	scanf("%d", &start_x);
+	int start_y;
+	printf("Enter starting position y: ");
+	scanf("%d", &start_y);
+	int scale;
+	printf("Wpisz jak bardzo widoczny ma być drugi obrazek skala (0-100): ");
+	scanf("%d", &scale);
+    merge(file_data, file_data_b, start_x, start_y, scale);
+  }
+  printf("Do you want to delate one of the main color? [y/n]:");
+  //clear buffer
+  while ((c = getchar()) != '\n' && c != EOF) { }
+  scanf("%c", &c);
+  if(  c == 'y') {
+	int color;
+	printf("Enter one int of color you want to delate (red=0, green=1, blue=2): ");
+	scanf("%d", &color);
+	
+    delate_one_of_rgb(color, file_data);
+  }
   saving("output.png", file_data);
-
   
   return 0;
 }
